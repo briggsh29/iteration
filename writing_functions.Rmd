@@ -251,7 +251,7 @@ read_page_reviews <- function(url) {
     str_replace_all("\n", "") %>% 
     str_trim()
   
-  tibble(
+  reviews = tibble(
     title = review_titles,
     stars = review_stars,
     text = review_text
@@ -263,7 +263,7 @@ read_page_reviews <- function(url) {
 Let's try the function
 
 ```{r}
-dyn_url = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=3"
+dyn_urls = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=3"
 
 read_page_reviews(dyn_url)
 
@@ -274,9 +274,7 @@ Read a few pages of reviews
 ```{r}
 dyn_url_base = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber="
 
-dyn_urls = str_c(dyn_url_base, 1:5)
-
-dyn_urls[3]
+dyn_urls = str_c(dyn_url_base, 1:50)
 
 all_reviews = 
   bind_rows(
@@ -290,4 +288,24 @@ all_reviews =
 all_reviews
 ```
 
-If we wanted 50 pages of reviews, would prefer not to have this code 50 times.
+If we wanted 50 pages of reviews, would prefer not to have this code (create df) 50 times.
+
+
+## Mean scoping example 
+```{r}
+f = function(x){
+  z = x + y
+  
+  z
+  
+}
+
+x = 1
+y = 2
+
+f(x = y)
+```
+
+x and y are in global envr, f uses x and y. Take 2 plug in for x inside function, y found in global envr (y = 2). So answer is 4. 
+
+If "y" exists in global envr but not as function, can end up with something that breaks. 
