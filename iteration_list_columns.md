@@ -1,18 +1,18 @@
-Writing Functions
+Itereation and List Columns
 ================
 
 ``` r
 library(tidyverse)
 ```
 
-    ## -- Attaching packages --------
+    ## -- Attaching packages ---- tidyverse 1.3.0 --
 
     ## v ggplot2 3.3.2     v purrr   0.3.4
     ## v tibble  3.0.3     v dplyr   1.0.2
     ## v tidyr   1.1.2     v stringr 1.4.0
     ## v readr   1.3.1     v forcats 0.5.0
 
-    ## -- Conflicts -----------------
+    ## -- Conflicts ------- tidyverse_conflicts() --
     ## x dplyr::filter() masks stats::filter()
     ## x dplyr::lag()    masks stats::lag()
 
@@ -51,89 +51,127 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-## Do Something Simple
+## Lists
+
+You can put anything in a list
 
 ``` r
-x_vec = rnorm(30, mean = 5, sd = 3)
+l = list(
+  vec_numeric = 5:8,
+  vec_logical = c(TRUE, TRUE, FALSE, TRUE, FALSE, FALSE),
+  mat = matrix(1:8, nrow = 2, ncol = 4),
+  summary = summary(rnorm(100))
+)
 
-(x_vec - mean(x_vec)) / sd(x_vec)
+l
 ```
 
-    ##  [1] -0.25759399  0.10521635 -0.65143649  0.25412812 -0.22571020 -1.57608801
-    ##  [7]  2.47270294 -0.07539634  0.43087262  1.26032047  0.30869865  0.43081919
-    ## [13] -0.85909048 -0.35450083 -0.97611060 -0.40895219 -2.01697399 -0.09369472
-    ## [19]  1.02218730  0.35962215  0.24707361  0.47140379 -1.98951809 -0.05639246
-    ## [25]  0.88168918 -0.91815340  0.49914991  1.74699031 -0.82871146  0.79744864
+    ## $vec_numeric
+    ## [1] 5 6 7 8
+    ## 
+    ## $vec_logical
+    ## [1]  TRUE  TRUE FALSE  TRUE FALSE FALSE
+    ## 
+    ## $mat
+    ##      [,1] [,2] [,3] [,4]
+    ## [1,]    1    3    5    7
+    ## [2,]    2    4    6    8
+    ## 
+    ## $summary
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ## -2.1142 -0.5765  0.1601  0.1146  0.8059  2.6422
 
 ``` r
-#Z scores, SD away from the mean
+l$vec_numeric
 ```
 
-I want a function to compute z scores
+    ## [1] 5 6 7 8
 
 ``` r
-z_scores = function(x) {
-  
-  if(!is.numeric(x)) {
-    stop("Input must be numeric")
-  }
-  
-  if(length(x) < 3) {
-    stop("Inpute must have at least 3 numbers")
-  }
-  
-  z = (x - mean(x)) / sd(x)
-  
-  return(z)
-}
-
-z_scores(x_vec)
+l[[1]]
 ```
 
-    ##  [1] -0.25759399  0.10521635 -0.65143649  0.25412812 -0.22571020 -1.57608801
-    ##  [7]  2.47270294 -0.07539634  0.43087262  1.26032047  0.30869865  0.43081919
-    ## [13] -0.85909048 -0.35450083 -0.97611060 -0.40895219 -2.01697399 -0.09369472
-    ## [19]  1.02218730  0.35962215  0.24707361  0.47140379 -1.98951809 -0.05639246
-    ## [25]  0.88168918 -0.91815340  0.49914991  1.74699031 -0.82871146  0.79744864
-
-Try function on other things. These should give errors.
+    ## [1] 5 6 7 8
 
 ``` r
-z_scores(3)
+l[["vec_numeric"]]
 ```
 
-    ## Error in z_scores(3): Inpute must have at least 3 numbers
+    ## [1] 5 6 7 8
 
 ``` r
-#Sd of 3 can't do
-#can't do mean on character var 
-z_scores(mtcars)
+l[["vec_numeric"]][1:3]
 ```
 
-    ## Error in z_scores(mtcars): Input must be numeric
+    ## [1] 5 6 7
 
 ``` r
-#can't take mena of dataset, only number list
-z_scores(c(TRUE, TRUE, FALSE, TRUE))
+mean(l[["vec_numeric"]])
 ```
 
-    ## Error in z_scores(c(TRUE, TRUE, FALSE, TRUE)): Input must be numeric
+    ## [1] 6.5
+
+## For loop
+
+Create new list
 
 ``` r
-#coerced to 0 and 1
+list_norm = 
+  list(
+    a = rnorm(20, mean = 3, sd = 1),
+    b = rnorm(30, mean = 0, sd = 5),
+    c = rnorm(40, mean = 10, sd = 0.2),
+    d = rnorm(20, mean = -3, sd = 1)
+  )
 ```
 
-## Multiple Outputs
+``` r
+list_norm
+```
+
+    ## $a
+    ##  [1] 2.5249955 4.0450324 3.5479659 3.3622448 5.1573232 3.9882118 3.7225453
+    ##  [8] 2.7010365 4.8201765 2.6990133 3.3683754 3.6339455 2.3918356 0.4601406
+    ## [15] 5.0633208 2.4836491 4.3403378 1.9576506 4.2879522 2.9343858
+    ## 
+    ## $b
+    ##  [1] -3.3940890  3.7113028 -5.0333000  0.6381511 -8.3595848 -3.4126698
+    ##  [7] -7.0699145 -5.0355480 -1.9237212 -4.4960905  9.6453761  0.7756012
+    ## [13] -2.7071832 -0.7777110  5.0867692 -1.1367178  0.9183465  6.8293666
+    ## [19] -8.7622629 -7.0870161  4.6762491 -1.7626867 -2.5544213  0.2262692
+    ## [25] -1.7734742  7.8111603  3.2415143 -7.4416637 -2.3293689 -3.0910634
+    ## 
+    ## $c
+    ##  [1]  9.663214  9.906666 10.039069  9.775875  9.945072  9.486269 10.000293
+    ##  [8]  9.647729  9.816676  9.711991  9.975708 10.256220  9.632057  9.994864
+    ## [15]  9.941738  9.534038 10.245374  9.717757  9.836742  9.994882 10.020318
+    ## [22]  9.904948  9.799020 10.334048 10.129532  9.710902 10.264547  9.683369
+    ## [29] 10.105506 10.372818 10.141737  9.776636 10.208998 10.047140 10.203109
+    ## [36] 10.207824 10.129402 10.060117 10.192562  9.949723
+    ## 
+    ## $d
+    ##  [1] -3.3725102 -3.6995389 -0.9704899 -2.9209496 -2.4839956 -3.2325942
+    ##  [7] -3.8259577 -3.3658887 -1.9926432 -3.3195600 -2.2129222 -3.4869846
+    ## [13] -2.6526452 -2.9809173 -3.7037874 -2.6611982 -3.4703962 -3.1080641
+    ## [19] -5.0612504 -4.0741845
+
+``` r
+list_norm[[1]]
+```
+
+    ##  [1] 2.5249955 4.0450324 3.5479659 3.3622448 5.1573232 3.9882118 3.7225453
+    ##  [8] 2.7010365 4.8201765 2.6990133 3.3683754 3.6339455 2.3918356 0.4601406
+    ## [15] 5.0633208 2.4836491 4.3403378 1.9576506 4.2879522 2.9343858
+
+Pause and get our old function
 
 ``` r
 mean_and_sd = function(x) {
   
-  if(!is.numeric(x)) {
-    stop("Input must be numeric")
-  }
-  
-  if(length(x) < 3) {
-    stop("Inpute must have at least 3 numbers")
+  if (!is.numeric(x)) {
+    stop("Argument x should be numeric")
+  } else if (length(x) == 1) {
+    stop("Cannot be computed for length 1 vectors")
   }
   
   mean_x = mean(x)
@@ -146,257 +184,52 @@ mean_and_sd = function(x) {
 }
 ```
 
-Check that function worked
+I can apply this to each list element
 
 ``` r
-x_vec = rnorm(100, mean = 3, sd = 4)
-mean_and_sd(x_vec)
+mean_and_sd(list_norm[[1]])
 ```
 
     ## # A tibble: 1 x 2
     ##    mean    sd
     ##   <dbl> <dbl>
-    ## 1  3.48  4.13
-
-## Multiple inputs
-
-Give me a sample size, mean, sd
+    ## 1  3.37  1.15
 
 ``` r
-sim_data = 
-  tibble(
-    x = rnorm(n = 100, mean = 4, sd = 3)
-  )
-
-#create dataframe
-sim_data %>% 
-  summarise(
-    mean = mean(x),
-    sd = sd(x)
-  )
+mean_and_sd(list_norm[[2]])
 ```
 
     ## # A tibble: 1 x 2
     ##    mean    sd
     ##   <dbl> <dbl>
-    ## 1  3.74  3.29
+    ## 1 -1.15  4.81
 
 ``` r
-#get mean and sd
+mean_and_sd(list_norm[[3]])
 ```
 
-I’d like to do this with a function
+    ## # A tibble: 1 x 2
+    ##    mean    sd
+    ##   <dbl> <dbl>
+    ## 1  9.96 0.229
 
 ``` r
-sim_mean_sd = function(samp_size, mu = 3, sigma = 3) {
+mean_and_sd(list_norm[[4]])
+```
+
+    ## # A tibble: 1 x 2
+    ##    mean    sd
+    ##   <dbl> <dbl>
+    ## 1 -3.13 0.855
+
+Let’s use a for loop
+
+``` r
+output = vector("list", length = 4)
+
+for (i in 1:4) {
   
-  sim_data = 
-  tibble(
-    x = rnorm(n = samp_size, mean = mu, sd = sigma)
-  )
-
-sim_data %>% 
-  summarise(
-    mean = mean(x),
-    sd = sd(x)
-  )
+  output[[i]] = mean_and_sd(list_norm[[i]])
   
 }
-
-sim_mean_sd(samp_size = 100, mu = 6, sigma = 3)
 ```
-
-    ## # A tibble: 1 x 2
-    ##    mean    sd
-    ##   <dbl> <dbl>
-    ## 1  5.88  2.92
-
-``` r
-sim_mean_sd(samp_size = 100, sigma = 3)
-```
-
-    ## # A tibble: 1 x 2
-    ##    mean    sd
-    ##   <dbl> <dbl>
-    ## 1  3.03  3.05
-
-``` r
-sim_mean_sd(samp_size = 100)
-```
-
-    ## # A tibble: 1 x 2
-    ##    mean    sd
-    ##   <dbl> <dbl>
-    ## 1  3.63  2.80
-
-## Lets review Napoleon Dynamite
-
-Scraping reviews from Napoleon Dynamite
-
-``` r
-url = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=1"
-
-dynamite_html = read_html(url)
-
-review_titles = 
-  dynamite_html %>%
-  html_nodes(".a-text-bold span") %>%
-  html_text()
-
-#extract elements of data we're interested in - ID css tag
-#Selector gadget
-#Convert to text
-
-review_stars = 
-  dynamite_html %>%
-  html_nodes("#cm_cr-review_list .review-rating") %>%
-  html_text() %>%
-  str_extract("^\\d") %>%
-  #get first digit number between 0-9 at start of string input 
-  as.numeric()
-#convert from char to numeric = review stars
-
-review_text = 
-  dynamite_html %>%
-  html_nodes(".review-text-content span") %>%
-  html_text() %>% 
-  str_replace_all("\n", "") %>% 
-  str_trim()
-
-reviews_page1 = tibble(
-  title = review_titles,
-  stars = review_stars,
-  text = review_text
-)
-#put reviews into tibble
-```
-
-What about next page of reviews?
-
-``` r
-url = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=2"
-
-dynamite_html = read_html(url)
-
-review_titles = 
-  dynamite_html %>%
-  html_nodes(".a-text-bold span") %>%
-  html_text()
-
-#extract elements of data we're interested in - ID css tag
-#Selector gadget
-#Convert to text
-
-review_stars = 
-  dynamite_html %>%
-  html_nodes("#cm_cr-review_list .review-rating") %>%
-  html_text() %>%
-  str_extract("^\\d") %>%
-  #get first digit number between 0-9 at start of string input 
-  as.numeric()
-#convert from char to numeric = review stars
-
-review_text = 
-  dynamite_html %>%
-  html_nodes(".review-text-content span") %>%
-  html_text() %>% 
-  str_replace_all("\n", "") %>% 
-  str_trim()
-
-reviews_page2 = tibble(
-  title = review_titles,
-  stars = review_stars,
-  text = review_text
-)
-#put reviews into tibble
-```
-
-Don’t want to just copy and paste. There are several pages of reviews
-(1800 reviews).
-
-Turn into function. Input, read URL for that page of reviews.
-
-``` r
-read_page_reviews <- function(url) {
-  
-  html = read_html(url)
-  
-  review_titles = 
-    html %>%
-    html_nodes(".a-text-bold span") %>%
-    html_text()
-  
-  review_stars = 
-    html %>%
-    html_nodes("#cm_cr-review_list .review-rating") %>%
-    html_text() %>%
-    str_extract("^\\d") %>%
-    as.numeric()
-  
-  review_text = 
-    html %>%
-    html_nodes(".review-text-content span") %>%
-    html_text() %>% 
-    str_replace_all("\n", "") %>% 
-    str_trim()
-  
-  tibble(
-    title = review_titles,
-    stars = review_stars,
-    text = review_text
-  )
-}
-```
-
-Let’s try the function
-
-``` r
-dyn_url = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=3"
-
-read_page_reviews(dyn_url)
-```
-
-    ## # A tibble: 10 x 3
-    ##    title                     stars text                                         
-    ##    <chr>                     <dbl> <chr>                                        
-    ##  1 A top favorite movie !!       5 "Love this movie, needed to add it to my col~
-    ##  2 Best.Movie!                   5 "I enjoyed showing my children this \"classi~
-    ##  3 Great Movie                   5 "I love this movie. Showed it to my middle s~
-    ##  4 Tina, you fat lard, come~     5 "A very quotable, awkard and hilarious movie~
-    ##  5 Funny!                        4 "It is a great movie although it’s a little ~
-    ##  6 Excellent for families        5 "Highly recommend for family entertainment"  
-    ##  7 Hilarious!                    5 "Hilarious!"                                 
-    ##  8 Excellent in all fronts.      5 "Excellent in all fronts."                   
-    ##  9 good                          5 "good"                                       
-    ## 10 Buy                           5 "Very good movie not very expensive"
-
-Read a few pages of reviews
-
-``` r
-dyn_url_base = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber="
-
-dyn_urls = str_c(dyn_url_base, 1:5)
-
-dyn_urls[3]
-```
-
-    ## [1] "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=3"
-
-``` r
-all_reviews = 
-  bind_rows(
-    read_page_reviews(dyn_urls[1]),
-    read_page_reviews(dyn_urls[2]),
-    read_page_reviews(dyn_urls[3]),
-    read_page_reviews(dyn_urls[4]),
-    read_page_reviews(dyn_urls[5])
-  )
-
-all_reviews
-```
-
-    ## # A tibble: 0 x 3
-    ## # ... with 3 variables: title <chr>, stars <dbl>, text <chr>
-
-If we wanted 50 pages of reviews, would prefer not to have this code 50
-times.
