@@ -54,7 +54,7 @@ z_scores = function(x) {
 z_scores(x_vec)
 ```
 
-Try function on other things 
+Try function on other things. These should give errors. 
 
 ```{r error = TRUE}
 z_scores(3)
@@ -67,3 +67,227 @@ z_scores(c(TRUE, TRUE, FALSE, TRUE))
 
 ```
 
+## Multiple Outputs
+
+```{r}
+mean_and_sd = function(x) {
+  
+  if(!is.numeric(x)) {
+    stop("Input must be numeric")
+  }
+  
+  if(length(x) < 3) {
+    stop("Inpute must have at least 3 numbers")
+  }
+  
+  mean_x = mean(x)
+  sd_x = sd(x)
+
+  tibble(
+    mean = mean_x, 
+    sd = sd_x
+  )
+}
+```
+
+Check that function worked
+
+```{r}
+x_vec = rnorm(100, mean = 3, sd = 4)
+mean_and_sd(x_vec)
+```
+
+## Multiple inputs 
+
+Give me a sample size, mean, sd
+
+```{r}
+sim_data = 
+  tibble(
+    x = rnorm(n = 100, mean = 4, sd = 3)
+  )
+
+#create dataframe
+sim_data %>% 
+  summarise(
+    mean = mean(x),
+    sd = sd(x)
+  )
+#get mean and sd
+```
+
+I'd like to do this with a function
+
+```{r}
+sim_mean_sd = function(samp_size, mu = 3, sigma = 3) {
+  
+  sim_data = 
+  tibble(
+    x = rnorm(n = samp_size, mean = mu, sd = sigma)
+  )
+
+sim_data %>% 
+  summarise(
+    mean = mean(x),
+    sd = sd(x)
+  )
+  
+}
+
+sim_mean_sd(samp_size = 100, mu = 6, sigma = 3)
+
+sim_mean_sd(samp_size = 100, sigma = 3)
+sim_mean_sd(samp_size = 100)
+```
+
+## Lets review Napoleon Dynamite 
+
+Scraping reviews from Napoleon Dynamite
+
+```{r}
+url = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=1"
+
+dynamite_html = read_html(url)
+
+review_titles = 
+  dynamite_html %>%
+  html_nodes(".a-text-bold span") %>%
+  html_text()
+
+#extract elements of data we're interested in - ID css tag
+#Selector gadget
+#Convert to text
+
+review_stars = 
+  dynamite_html %>%
+  html_nodes("#cm_cr-review_list .review-rating") %>%
+  html_text() %>%
+  str_extract("^\\d") %>%
+  #get first digit number between 0-9 at start of string input 
+  as.numeric()
+#convert from char to numeric = review stars
+
+review_text = 
+  dynamite_html %>%
+  html_nodes(".review-text-content span") %>%
+  html_text() %>% 
+  str_replace_all("\n", "") %>% 
+  str_trim()
+
+reviews_page1 = tibble(
+  title = review_titles,
+  stars = review_stars,
+  text = review_text
+)
+#put reviews into tibble
+```
+
+What about next page of reviews?
+
+```{r}
+url = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=2"
+
+dynamite_html = read_html(url)
+
+review_titles = 
+  dynamite_html %>%
+  html_nodes(".a-text-bold span") %>%
+  html_text()
+
+#extract elements of data we're interested in - ID css tag
+#Selector gadget
+#Convert to text
+
+review_stars = 
+  dynamite_html %>%
+  html_nodes("#cm_cr-review_list .review-rating") %>%
+  html_text() %>%
+  str_extract("^\\d") %>%
+  #get first digit number between 0-9 at start of string input 
+  as.numeric()
+#convert from char to numeric = review stars
+
+review_text = 
+  dynamite_html %>%
+  html_nodes(".review-text-content span") %>%
+  html_text() %>% 
+  str_replace_all("\n", "") %>% 
+  str_trim()
+
+reviews_page2 = tibble(
+  title = review_titles,
+  stars = review_stars,
+  text = review_text
+)
+#put reviews into tibble
+```
+
+Don't want to just copy and paste. There are several pages of reviews (1800 reviews). 
+
+Turn into function. Input, read URL for that page of reviews.
+
+```{r}
+
+read_page_reviews <- function(url) {
+  
+  html = read_html(url)
+  
+  review_titles = 
+    html %>%
+    html_nodes(".a-text-bold span") %>%
+    html_text()
+  
+  review_stars = 
+    html %>%
+    html_nodes("#cm_cr-review_list .review-rating") %>%
+    html_text() %>%
+    str_extract("^\\d") %>%
+    as.numeric()
+  
+  review_text = 
+    html %>%
+    html_nodes(".review-text-content span") %>%
+    html_text() %>% 
+    str_replace_all("\n", "") %>% 
+    str_trim()
+  
+  tibble(
+    title = review_titles,
+    stars = review_stars,
+    text = review_text
+  )
+}
+
+```
+
+Let's try the function
+
+```{r}
+dyn_url = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=3"
+
+read_page_reviews(dyn_url)
+
+```
+
+Read a few pages of reviews 
+
+```{r}
+dyn_url_base = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber="
+
+dyn_urls = str_c(dyn_url_base, 1:5)
+
+dyn_urls[3]
+
+all_reviews = 
+  bind_rows(
+    read_page_reviews(dyn_urls[1]),
+    read_page_reviews(dyn_urls[2]),
+    read_page_reviews(dyn_urls[3]),
+    read_page_reviews(dyn_urls[4]),
+    read_page_reviews(dyn_urls[5])
+  )
+
+all_reviews
+```
+
+If we wanted 50 pages of reviews, would prefer not to have this code 50 times.
